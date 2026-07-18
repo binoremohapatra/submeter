@@ -13,6 +13,8 @@ export class ApiError extends Error {
   }
 }
 
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+
 export async function apiFetch<T = unknown>(
   path: string,
   session: Session | null,
@@ -26,7 +28,7 @@ export async function apiFetch<T = unknown>(
     ...(options?.headers ?? {}),
   };
 
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
   });

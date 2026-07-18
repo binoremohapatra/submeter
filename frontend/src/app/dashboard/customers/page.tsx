@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { apiFetch, formatDate } from "@/lib/api";
+import { apiFetch, formatDate, API_BASE } from "@/lib/api";
 import { StatusBadge } from "@/components/ui/status-dot";
 import { toast } from "@/components/ui/toast";
 import { Search, Plus, Download, ChevronLeft, ChevronRight, X, AlertCircle } from "lucide-react";
@@ -232,7 +232,7 @@ export default function CustomersPage() {
   const handleExport = async () => {
     if (!session) return;
     try {
-      const res = await fetch("/api/customers/export", {
+      const res = await fetch(`${API_BASE}/customers/export`, {
         headers: { Authorization: `Bearer ${(session as any).accessToken}` },
       });
       if (!res.ok) throw new Error("Export failed");

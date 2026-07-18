@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/toast";
 import Link from "next/link";
+import { API_BASE } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -39,7 +40,7 @@ export default function RegisterPage() {
 
     try {
       // 1. Create user account
-      const registerRes = await fetch("/api/register", {
+      const registerRes = await fetch(`${API_BASE}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

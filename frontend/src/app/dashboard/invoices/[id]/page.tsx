@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Script from "next/script";
-import { apiFetch, formatDate } from "@/lib/api";
+import { apiFetch, formatDate, API_BASE } from "@/lib/api";
 import { StatusBadge } from "@/components/ui/status-dot";
 import { toast } from "@/components/ui/toast";
 import { ArrowLeft, Download, CreditCard, ExternalLink, AlertCircle, Copy, Check } from "lucide-react";
@@ -199,7 +199,7 @@ export default function InvoiceDetailsPage() {
   const handlePdf = async () => {
     if (!session || !inv) return;
     try {
-      const res = await fetch(`/api/invoices/${inv.id}/pdf`, {
+      const res = await fetch(`${API_BASE}/invoices/${inv.id}/pdf`, {
         headers: { Authorization: `Bearer ${(session as any).accessToken}` },
       });
       if (!res.ok) throw new Error("PDF generation failed");

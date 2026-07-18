@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { API_BASE } from "./api";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,7 +16,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const res = await fetch((process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api") + "/auth/login", {
+          const res = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
             body: JSON.stringify({
               email: credentials.email,
