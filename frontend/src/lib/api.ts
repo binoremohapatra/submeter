@@ -13,7 +13,7 @@ export class ApiError extends Error {
   }
 }
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+export const API_BASE = "/api";
 
 export async function apiFetch<T = unknown>(
   path: string,
