@@ -1,0 +1,3 @@
+com\submeter\auth\AuthIntegrationTest.class
+com\submeter\billing\BillingCalculatorTest.class
+com\submeter\entity\EntityBuilderDefaultsTest.class

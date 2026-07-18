@@ -1,0 +1,25 @@
+# Dev profile — relaxes prod settings so the app starts without all secrets
+# Activate with: SPRING_PROFILES_ACTIVE=dev
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/submeter
+    username: submeter
+    password: submeter_dev
+
+app:
+  jwt:
+    secret: dev-jwt-secret-32-chars-minimum-pad
+  razorpay:
+    key-id: rzp_test_TDlxd8rTABFHMd
+    key-secret: 7ybEuJh1ib2imbNMC7riH5b3
+    webhook-secret: dev-webhook-secret
+  dev-mode: true
+
+submeter:
+  import:
+    saas: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

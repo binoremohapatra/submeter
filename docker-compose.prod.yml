@@ -1,0 +1,64 @@
+# SubMeter — Docker Compose Override (Production)
+# Usage (merge with base):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Designed for Render / Railway deployment:
+#   - Both services expect managed database (external PostgreSQL, $DATABASE_URL).
+#   - All secrets come from the platform's environment variable UI — no .env file.
+#   - Storage volume is cloud-provider-persistent (Render disk / Railway volume).
+#
+# Render deploy steps:
+#   1. Push to GitHub main → Render auto-builds from root Dockerfile.
+#   2. Set env vars in Render dashboard (see .env.example for names).
+#   3. Add a PostgreSQL add-on; Render injects $DATABASE_URL automatically.
+#
+# Railway deploy steps:
+#   1. railway init → railway up (uses this file).
+#   2. Add a PostgreSQL plugin; Railway injects $DATABASE_URL automatically.
+#   3. Set remaining env vars in Railway project settings.
+
+services:
+
+  # ── No local postgres in prod — use managed DB ─────────────────────────────
+  postgres:
+    # Disabled: replace with managed PostgreSQL from Render/Railway
+    profiles: ["local-only"]
+
+  # ── Spring Boot API (prod overrides) ───────────────────────────────────────
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: ""        # Use default (prod) profile
+      # Render/Railway inject DATABASE_URL as postgres://user:pass@host:port/db
+      # We map it to JDBC format below — set SPRING_DATASOURCE_URL manually or
+      # use an environment variable transform in the platform dashboard.
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      DEV_MODE: "false"
+      STORAGE_PATH: /app/storage
+    # No port exposure in prod — traffic goes through Render/Railway reverse proxy
+    ports: []
+    deploy:
+      resources:
+        limits:
+          memory: 512M   # Stay within free-tier container limits
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # ── Next.js Frontend (prod overrides) ──────────────────────────────────────
+  frontend:
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}   # public-facing API URL
+      API_URL: ${API_URL:-http://backend:8080/api}  # internal SSR URL
+      NODE_ENV: production
+    ports: []
+    deploy:
+      resources:
+        limits:
+          memory: 256M

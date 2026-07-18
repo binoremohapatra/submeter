@@ -1,0 +1,19 @@
+app:
+  jwt:
+    secret: test-jwt-secret-exactly-32-chars!
+    access-token-expiry-ms: 900000
+    refresh-token-expiry-ms: 86400000
+    secure-cookie: false      # HTTP in test; no HTTPS
+  razorpay:
+    key-id: rzp_test_placeholder
+    key-secret: placeholder_secret_value
+    webhook-secret: test-webhook-secret
+  dev-mode: true
+  rate-limit:
+    login-max-attempts: 5
+    login-window-minutes: 15
+
+logging:
+  level:
+    com.submeter: DEBUG
+    org.springframework.security: DEBUG

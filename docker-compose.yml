@@ -1,0 +1,78 @@
+# SubMeter — Docker Compose (Development)
+# Usage:
+#   cp .env.example .env        # fill in RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+#   docker compose up --build
+#
+# Services:
+#   postgres  → localhost:5432
+#   backend   → http://localhost:8080/api
+#   frontend  → http://localhost:3000
+
+services:
+
+  # ── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: submeter-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: submeter
+      POSTGRES_USER: submeter
+      POSTGRES_PASSWORD: submeter_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U submeter -d submeter"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ── Spring Boot API ─────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: submeter-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/submeter
+      SPRING_DATASOURCE_USERNAME: submeter
+      SPRING_DATASOURCE_PASSWORD: submeter_dev
+      # Dev fallbacks — override in .env for real Razorpay test keys
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-min-32-chars-padded-ok}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_placeholder}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-placeholder_secret}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-dev-webhook-secret}
+      DEV_MODE: "true"
+      STORAGE_PATH: /app/storage
+    ports:
+      - "8080:8080"
+    volumes:
+      - invoices:/app/storage/invoices
+    restart: unless-stopped
+
+  # ── Next.js Frontend ────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: submeter-frontend
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api
+      # Internal service URL for SSR API calls (container-to-container)
+      API_URL: http://backend:8080/api
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  invoices:
