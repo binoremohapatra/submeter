@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const backendUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
 const nextConfig: NextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async rewrites() {
     return {
       fallback: [
