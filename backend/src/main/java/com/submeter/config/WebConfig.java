@@ -33,7 +33,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 // In prod, restrict to the exact frontend origin.
                 // In dev, allow localhost:3000 (Next.js dev server).
-                .allowedOriginPatterns("http://localhost:3000", "https://*.submeter.io")
+              .allowedOriginPatterns(
+                 "http://localhost:3000",
+               "https://submeter-lac.vercel.app"
+)
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)  // Required for cookie-based auth
