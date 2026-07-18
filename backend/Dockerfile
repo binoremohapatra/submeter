@@ -15,21 +15,21 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-# Non-root user for security
+# Create non-root user
 RUN addgroup -S submeter && adduser -S submeter -G submeter
-USER submeter
 
-# PDF and invoice file storage (mounted as a volume in docker-compose)
-RUN mkdir -p /app/storage/invoices
+# Create storage directory as root and give permissions
+RUN mkdir -p /app/storage/invoices && \
+    chown -R submeter:submeter /app
 
+# Copy application
 COPY --from=builder /build/target/submeter-api-*.jar app.jar
+
+# Switch to non-root user
+USER submeter
 
 EXPOSE 8080
 
-# JVM flags tuned for container memory limits:
-# -XX:+UseContainerSupport  — respects cgroup memory limits (not host RAM)
-# -XX:MaxRAMPercentage=75   — use up to 75% of container RAM for heap
-# -Dspring.profiles.active  — set via environment; defaults to prod
 ENTRYPOINT ["java", \
             "-XX:+UseContainerSupport", \
             "-XX:MaxRAMPercentage=75.0", \
